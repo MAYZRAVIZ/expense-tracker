@@ -1,5 +1,9 @@
 # Daily Expenses Tracker (PHP ₱)
 
+**Live:** https://expense-tracker-ba77f451.deed.page/
+
+**Repo:** https://github.com/MAYZRAVIZ/expense-tracker
+
 Mobile-first offline expense tracker for the Philippines.
 
 - English UI · Asia/Manila dates · PHP peso formatting
