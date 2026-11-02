@@ -1,0 +1,3 @@
+Live HTTPS (deed.page): https://expense-tracker-ba77f451.deed.page/
+Slug: expense-tracker-ba77f451
+GitHub repo: https://github.com/MAYZRAVIZ/expense-tracker
