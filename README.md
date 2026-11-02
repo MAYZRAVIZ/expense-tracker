@@ -39,3 +39,8 @@ expense-tracker/
 ## iPhone / Safari tips
 
 If Add to Home Screen still shows an old version after an update, open the site once in Safari, wait a second, then reopen the home-screen icon (or remove and re-add it).
+
+### Edit & categories
+
+- Every expense/income row shows **✎ Edit** and **Delete** buttons (no need to “expand” the row first).
+- **More → Manage categories** (also under Add → Manage) to add, rename, change icons, or delete categories.

@@ -1,4 +1,5 @@
 Live HTTPS (deed.page): https://expense-tracker-ba77f451.deed.page/
 Slug: expense-tracker-ba77f451
 GitHub repo: https://github.com/MAYZRAVIZ/expense-tracker
-Fixed: SW cache expense-tracker-v3; tab bar cleared above deed badge; Safari amount/date/zoom fixes.
+SW cache: expense-tracker-v4
+Fix: always-visible Edit on expenses; Manage Categories screen (add/rename/icon/delete).
