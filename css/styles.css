@@ -705,3 +705,169 @@ main { padding: 8px 16px 24px; }
   overflow: hidden;
   clip: rect(0,0,0,0);
 }
+
+/* Always-visible row actions (iOS-friendly buttons, not expand-to-reveal) */
+.entry {
+  grid-template-columns: auto 1fr auto;
+  touch-action: manipulation;
+  cursor: pointer;
+  -webkit-touch-callout: none;
+}
+.entry-actions {
+  display: flex;
+  gap: 8px;
+  grid-column: 1 / -1;
+  margin-top: 2px;
+}
+.entry-actions .edit,
+.entry-actions .del {
+  flex: 1;
+  min-height: 48px;
+  font-size: 16px;
+  font-weight: 700;
+  touch-action: manipulation;
+  cursor: pointer;
+}
+.entry-actions .edit {
+  background: rgba(15, 118, 110, 0.12);
+  border-color: rgba(15, 118, 110, 0.35);
+  color: var(--primary);
+}
+.inline-link {
+  display: inline;
+  min-height: 0;
+  padding: 0 4px;
+  font-size: 0.95rem;
+  vertical-align: baseline;
+}
+
+/* Full-screen manage categories sheet */
+.sheet[hidden] { display: none !important; }
+.sheet {
+  position: fixed;
+  inset: 0;
+  z-index: 80;
+  background: var(--bg);
+  padding-left: var(--safe-left);
+  padding-right: var(--safe-right);
+}
+.sheet-inner {
+  max-width: 480px;
+  margin: 0 auto;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+  min-height: 100dvh;
+}
+.sheet-head {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: calc(10px + var(--safe-top)) 12px 10px;
+  border-bottom: 1px solid var(--border);
+  background: var(--bg-elev);
+  position: sticky;
+  top: 0;
+  z-index: 2;
+}
+.sheet-head h2 {
+  margin: 0;
+  font-size: 1.15rem;
+  flex: 1;
+}
+.sheet-spacer { width: var(--tap); }
+.sheet-body {
+  flex: 1;
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+  padding: 12px 16px calc(24px + var(--badge-clearance) + var(--safe-bottom));
+}
+
+.cat-manage-list {
+  list-style: none;
+  margin: 0 0 14px;
+  padding: 0;
+  display: grid;
+  gap: 10px;
+}
+.cat-manage-list li {
+  display: grid;
+  grid-template-columns: 52px 1fr auto;
+  gap: 10px;
+  align-items: center;
+  padding: 10px;
+  background: var(--bg-elev);
+  border: 1px solid var(--border);
+  border-radius: 14px;
+}
+.cat-manage-list .cat-ico {
+  width: 52px;
+  height: 52px;
+  border-radius: 12px;
+  border: 1px solid var(--border);
+  background: var(--bg);
+  font-size: 1.5rem;
+  display: grid;
+  place-items: center;
+  cursor: pointer;
+  touch-action: manipulation;
+  -webkit-appearance: none;
+  appearance: none;
+}
+.cat-manage-list .cat-name {
+  font-weight: 700;
+  font-size: 1rem;
+  text-align: left;
+  border: 0;
+  background: transparent;
+  color: var(--text);
+  padding: 8px 0;
+  min-height: 48px;
+  cursor: pointer;
+  touch-action: manipulation;
+  -webkit-appearance: none;
+  appearance: none;
+}
+.cat-manage-list .cat-edit-btn {
+  min-width: 72px;
+  min-height: 48px;
+  border-radius: 12px;
+  border: 1px solid rgba(15, 118, 110, 0.35);
+  background: rgba(15, 118, 110, 0.12);
+  color: var(--primary);
+  font-weight: 700;
+  font-size: 16px;
+  cursor: pointer;
+  touch-action: manipulation;
+  -webkit-appearance: none;
+  appearance: none;
+}
+
+.icon-pick {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-bottom: 8px;
+}
+.icon-pick button {
+  width: 48px;
+  height: 48px;
+  border-radius: 12px;
+  border: 1px solid var(--border);
+  background: var(--bg);
+  font-size: 1.35rem;
+  cursor: pointer;
+  touch-action: manipulation;
+  -webkit-appearance: none;
+  appearance: none;
+}
+.icon-pick button.active {
+  border-color: var(--primary);
+  background: rgba(15, 118, 110, 0.14);
+}
+
+.sheet .more-block h3 {
+  margin: 0 0 10px;
+  font-size: 1rem;
+}

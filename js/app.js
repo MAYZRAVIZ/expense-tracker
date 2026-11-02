@@ -24,7 +24,7 @@
   var selectedPay = 'Cash';
   var period = 'day';
   var showAll = false;
-  var expandedId = null;
+  var editingCatId = null;
 
   function $(sel, root) { return (root || document).querySelector(sel); }
   function $$(sel, root) { return Array.prototype.slice.call((root || document).querySelectorAll(sel)); }
@@ -346,6 +346,28 @@
     sel.value = cur;
   }
 
+  function bindTap(el, handler) {
+    if (!el) return;
+    var locked = false;
+    var recentTouch = false;
+    function run(ev) {
+      if (locked) return;
+      locked = true;
+      try { handler(ev); } catch (e) { console.error(e); }
+      setTimeout(function () { locked = false; }, 500);
+    }
+    el.addEventListener('touchend', function (ev) {
+      recentTouch = true;
+      setTimeout(function () { recentTouch = false; }, 700);
+      try { ev.preventDefault(); } catch (e) {}
+      run(ev);
+    }, { passive: false });
+    el.addEventListener('click', function (ev) {
+      if (recentTouch) return; // swallow iOS ghost click
+      run(ev);
+    });
+  }
+
   function renderList() {
     var list = filteredEntries();
     var ul = $('#entryList');
@@ -366,6 +388,22 @@
       if (showAll || e.date !== today) metaParts.push(e.date);
       if (e.type === 'expense') metaParts.push(e.payment || 'Cash');
       if (e.note) metaParts.push(e.note);
+
+      var actions = document.createElement('div');
+      actions.className = 'entry-actions';
+      var editBtn = document.createElement('button');
+      editBtn.type = 'button';
+      editBtn.className = 'edit';
+      editBtn.setAttribute('aria-label', 'Edit entry');
+      editBtn.textContent = '✎ Edit';
+      var delBtn = document.createElement('button');
+      delBtn.type = 'button';
+      delBtn.className = 'del';
+      delBtn.setAttribute('aria-label', 'Delete entry');
+      delBtn.textContent = 'Delete';
+      actions.appendChild(editBtn);
+      actions.appendChild(delBtn);
+
       li.innerHTML =
         '<div class="entry-icon">' + cat.icon + '</div>' +
         '<div class="entry-main">' +
@@ -373,34 +411,22 @@
           '<div class="entry-meta">' + escapeHtml(metaParts.join(' · ') || '—') + '</div>' +
         '</div>' +
         '<div class="entry-amt ' + e.type + '">' + sign + formatMoney(e.amount) + '</div>';
+      li.appendChild(actions);
 
-      if (expandedId === e.id) {
-        var actions = document.createElement('div');
-        actions.className = 'entry-actions';
-        actions.innerHTML = '<button type="button" class="edit">Edit</button><button type="button" class="del">Delete</button>';
-        actions.querySelector('.edit').addEventListener('click', function (ev) {
-          ev.preventDefault();
-          ev.stopPropagation();
-          startEdit(e);
-        });
-        actions.querySelector('.del').addEventListener('click', function (ev) {
-          ev.preventDefault();
-          ev.stopPropagation();
-          if (window.confirm('Delete this entry?')) {
-            state.entries = state.entries.filter(function (x) { return x.id !== e.id; });
-            saveState();
-            expandedId = null;
-            refresh();
-            toast('Deleted');
-          }
-        });
-        li.appendChild(actions);
-      }
-
-      li.addEventListener('click', function () {
-        expandedId = expandedId === e.id ? null : e.id;
-        renderList();
+      bindTap(editBtn, function () { startEdit(e); });
+      bindTap(delBtn, function () {
+        if (window.confirm('Delete this entry?')) {
+          state.entries = state.entries.filter(function (x) { return x.id !== e.id; });
+          saveState();
+          refresh();
+          toast('Deleted');
+        }
       });
+      // Tapping the row body also opens edit (discoverable)
+      bindTap(li.querySelector('.entry-main'), function () { startEdit(e); });
+      bindTap(li.querySelector('.entry-icon'), function () { startEdit(e); });
+      bindTap(li.querySelector('.entry-amt'), function () { startEdit(e); });
+
       ul.appendChild(li);
     });
   }
@@ -584,44 +610,85 @@
     box.innerHTML = svg;
   }
 
-  function renderCatEdit() {
-    var ul = $('#catEditList');
+  var ICON_PRESETS = ['🍜','🚌','💡','📱','🛒','🛍️','💊','💼','📦','☕','🏠','🎓','🎮','✈️','🐾','🎁','🧾','⛽','🎬','🧃'];
+
+  function openCatsScreen() {
+    editingCatId = null;
+    $('#catEditor').hidden = true;
+    $('#catAddBlock').hidden = false;
+    renderCatManage();
+    $('#catsScreen').hidden = false;
+    try { document.body.style.overflow = 'hidden'; } catch (e) {}
+  }
+
+  function closeCatsScreen() {
+    $('#catsScreen').hidden = true;
+    editingCatId = null;
+    try { document.body.style.overflow = ''; } catch (e) {}
+    renderCatGrid();
+    renderFilterCats();
+  }
+
+  function fillIconPick(container, inputEl, current) {
+    container.innerHTML = '';
+    ICON_PRESETS.forEach(function (ico) {
+      var b = document.createElement('button');
+      b.type = 'button';
+      b.textContent = ico;
+      if (ico === current) b.className = 'active';
+      bindTap(b, function () {
+        inputEl.value = ico;
+        fillIconPick(container, inputEl, ico);
+      });
+      container.appendChild(b);
+    });
+  }
+
+  function renderCatManage() {
+    var ul = $('#catManageList');
+    if (!ul) return;
     ul.innerHTML = '';
     state.categories.forEach(function (c) {
       var li = document.createElement('li');
-      li.innerHTML = '<span class="ico">' + c.icon + '</span>';
-      var input = document.createElement('input');
-      input.type = 'text';
-      input.value = c.name;
-      input.addEventListener('change', function () {
-        c.name = input.value.trim() || c.name;
-        saveState();
-        renderFilterCats();
-        renderCatGrid();
-        toast('Category updated');
-      });
-      var rm = document.createElement('button');
-      rm.type = 'button';
-      rm.className = 'rm';
-      rm.textContent = '✕';
-      rm.title = 'Remove';
-      rm.addEventListener('click', function () {
-        if (state.categories.length <= 1) {
-          toast('Keep at least one category');
-          return;
-        }
-        if (!window.confirm('Remove category “' + c.name + '”?')) return;
-        state.categories = state.categories.filter(function (x) { return x.id !== c.id; });
-        if (selectedCategory === c.id) selectedCategory = state.categories[0].id;
-        saveState();
-        renderCatEdit();
-        renderFilterCats();
-        renderCatGrid();
-      });
-      li.appendChild(input);
-      li.appendChild(rm);
+      var icoBtn = document.createElement('button');
+      icoBtn.type = 'button';
+      icoBtn.className = 'cat-ico';
+      icoBtn.textContent = c.icon;
+      icoBtn.setAttribute('aria-label', 'Edit ' + c.name);
+      var nameBtn = document.createElement('button');
+      nameBtn.type = 'button';
+      nameBtn.className = 'cat-name';
+      nameBtn.textContent = c.name;
+      var editBtn = document.createElement('button');
+      editBtn.type = 'button';
+      editBtn.className = 'cat-edit-btn';
+      editBtn.textContent = '✎ Edit';
+      function openEditor() { openCatEditor(c.id); }
+      bindTap(icoBtn, openEditor);
+      bindTap(nameBtn, openEditor);
+      bindTap(editBtn, openEditor);
+      li.appendChild(icoBtn);
+      li.appendChild(nameBtn);
+      li.appendChild(editBtn);
       ul.appendChild(li);
     });
+  }
+
+  function openCatEditor(id) {
+    var c = catById(id);
+    editingCatId = c.id;
+    $('#catEditor').hidden = false;
+    $('#catAddBlock').hidden = true;
+    $('#catEditorTitle').textContent = 'Edit “' + c.name + '”';
+    $('#catEditName').value = c.name;
+    $('#catEditIcon').value = c.icon;
+    fillIconPick($('#iconPick'), $('#catEditIcon'), c.icon);
+    try { $('#catEditName').focus(); } catch (e) {}
+  }
+
+  function renderCatEdit() {
+    // Back-compat alias used by setTab('more')
+    renderCatManage();
   }
 
   function updateBudgetHint() {
@@ -903,7 +970,7 @@
       toast('Budget saved');
     });
 
-    $('#addCatBtn').addEventListener('click', function () {
+    function addCategoryFromForm() {
       var name = ($('#newCatName').value || '').trim();
       var icon = ($('#newCatIcon').value || '').trim() || '📌';
       if (!name) {
@@ -916,11 +983,71 @@
       state.categories.push({ id: id, name: name, icon: icon });
       saveState();
       $('#newCatName').value = '';
-      $('#newCatIcon').value = '';
-      renderCatEdit();
+      $('#newCatIcon').value = icon;
+      fillIconPick($('#iconPickNew'), $('#newCatIcon'), icon);
+      renderCatManage();
       renderFilterCats();
       renderCatGrid();
       toast('Category added');
+    }
+    bindTap($('#addCatBtn'), addCategoryFromForm);
+
+    bindTap($('#openCatsBtn'), openCatsScreen);
+    bindTap($('#manageCatsFromAdd'), openCatsScreen);
+    bindTap($('#catsBackBtn'), closeCatsScreen);
+    if ($('#drawerCats')) {
+      bindTap($('#drawerCats'), function () {
+        $('#drawer').hidden = true;
+        openCatsScreen();
+      });
+    }
+
+    bindTap($('#catSaveBtn'), function () {
+      if (!editingCatId) return;
+      var c = null;
+      for (var i = 0; i < state.categories.length; i++) {
+        if (state.categories[i].id === editingCatId) { c = state.categories[i]; break; }
+      }
+      if (!c) return;
+      var name = ($('#catEditName').value || '').trim();
+      var icon = ($('#catEditIcon').value || '').trim() || c.icon;
+      if (!name) { toast('Enter a name'); return; }
+      c.name = name;
+      c.icon = icon;
+      saveState();
+      editingCatId = null;
+      $('#catEditor').hidden = true;
+      $('#catAddBlock').hidden = false;
+      renderCatManage();
+      renderFilterCats();
+      renderCatGrid();
+      toast('Category saved');
+    });
+
+    bindTap($('#catDeleteBtn'), function () {
+      if (!editingCatId) return;
+      if (state.categories.length <= 1) {
+        toast('Keep at least one category');
+        return;
+      }
+      var c = catById(editingCatId);
+      if (!window.confirm('Delete category “' + c.name + '”? Existing entries keep their amounts.')) return;
+      state.categories = state.categories.filter(function (x) { return x.id !== editingCatId; });
+      if (selectedCategory === editingCatId) selectedCategory = state.categories[0].id;
+      editingCatId = null;
+      saveState();
+      $('#catEditor').hidden = true;
+      $('#catAddBlock').hidden = false;
+      renderCatManage();
+      renderFilterCats();
+      renderCatGrid();
+      toast('Category deleted');
+    });
+
+    bindTap($('#catCancelBtn'), function () {
+      editingCatId = null;
+      $('#catEditor').hidden = true;
+      $('#catAddBlock').hidden = false;
     });
 
     $('#exportCsvBtn').addEventListener('click', exportCSV);
@@ -993,6 +1120,10 @@
     renderCatGrid();
     renderPayChips();
     bind();
+    if ($('#iconPickNew') && $('#newCatIcon')) {
+      $('#newCatIcon').value = '📌';
+      fillIconPick($('#iconPickNew'), $('#newCatIcon'), '📌');
+    }
     refresh();
     registerSW();
   }

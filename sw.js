@@ -1,5 +1,5 @@
 /* Expense Tracker service worker — cache-first, versioned */
-const CACHE = 'expense-tracker-v3';
+const CACHE = 'expense-tracker-v4';
 const PRECACHE = [
   './',
   './index.html',

@@ -92,7 +92,7 @@
           </label>
 
           <label class="field" id="categoryField">
-            <span>Category</span>
+            <span>Category <button type="button" class="link-btn inline-link" id="manageCatsFromAdd">Manage</button></span>
             <div class="cat-grid" id="catGrid"></div>
           </label>
 
@@ -158,12 +158,8 @@
 
         <div class="more-block">
           <h2>Categories</h2>
-          <ul id="catEditList" class="cat-edit-list"></ul>
-          <div class="add-cat-row">
-            <input type="text" id="newCatName" maxlength="24" placeholder="New category name" />
-            <input type="text" id="newCatIcon" maxlength="4" placeholder="😀" class="icon-input" />
-            <button type="button" class="btn secondary" id="addCatBtn">Add</button>
-          </div>
+          <p class="hint" style="margin-top:0">Add, rename, change icons, or delete categories.</p>
+          <button type="button" class="btn primary" id="openCatsBtn" style="width:100%;margin-top:8px">Manage categories</button>
         </div>
 
         <div class="more-block">
@@ -188,6 +184,51 @@
     </main>
   </div>
 
+
+  <!-- Manage Categories full-screen sheet -->
+  <div id="catsScreen" class="sheet" hidden>
+    <div class="sheet-inner" role="dialog" aria-modal="true" aria-labelledby="catsTitle">
+      <header class="sheet-head">
+        <button type="button" class="icon-btn" id="catsBackBtn" aria-label="Back">←</button>
+        <h2 id="catsTitle">Manage categories</h2>
+        <span class="sheet-spacer"></span>
+      </header>
+      <div class="sheet-body">
+        <ul id="catManageList" class="cat-manage-list"></ul>
+        <div class="more-block" id="catEditor" hidden>
+          <h3 id="catEditorTitle">Edit category</h3>
+          <label class="field">
+            <span>Name</span>
+            <input type="text" id="catEditName" maxlength="24" autocomplete="off" />
+          </label>
+          <label class="field">
+            <span>Icon (emoji)</span>
+            <div class="icon-pick" id="iconPick"></div>
+            <input type="text" id="catEditIcon" maxlength="4" class="icon-input" placeholder="😀" autocomplete="off" />
+          </label>
+          <div class="btn-stack">
+            <button type="button" class="btn primary" id="catSaveBtn">Save category</button>
+            <button type="button" class="btn danger" id="catDeleteBtn">Delete category</button>
+            <button type="button" class="btn ghost" id="catCancelBtn">Cancel</button>
+          </div>
+        </div>
+        <div class="more-block" id="catAddBlock">
+          <h3>Add category</h3>
+          <label class="field">
+            <span>Name</span>
+            <input type="text" id="newCatName" maxlength="24" placeholder="e.g. Pets" autocomplete="off" />
+          </label>
+          <label class="field">
+            <span>Icon</span>
+            <div class="icon-pick" id="iconPickNew"></div>
+            <input type="text" id="newCatIcon" maxlength="4" class="icon-input" placeholder="😀" autocomplete="off" />
+          </label>
+          <button type="button" class="btn secondary" id="addCatBtn">Add category</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
   <!-- Menu drawer -->
   <div id="drawer" class="drawer" hidden>
     <div class="drawer-backdrop" id="drawerBackdrop"></div>
@@ -196,6 +237,7 @@
       <button type="button" class="drawer-item" data-goto="add">＋ Quick add</button>
       <button type="button" class="drawer-item" data-goto="stats">📊 Stats</button>
       <button type="button" class="drawer-item" data-goto="more">⚙️ Budget &amp; settings</button>
+      <button type="button" class="drawer-item" id="drawerCats">🏷 Manage categories</button>
       <button type="button" class="drawer-item" id="drawerExport">⬇ Export JSON</button>
       <button type="button" class="drawer-item" id="drawerClose">Close</button>
     </div>
