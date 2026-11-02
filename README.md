@@ -35,3 +35,7 @@ expense-tracker/
   icons/
   screenshots/
 ```
+
+## iPhone / Safari tips
+
+If Add to Home Screen still shows an old version after an update, open the site once in Safari, wait a second, then reopen the home-screen icon (or remove and re-add it).
