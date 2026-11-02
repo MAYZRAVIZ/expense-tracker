@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, maximum-scale=5" />
   <meta name="theme-color" content="#0f766e" media="(prefers-color-scheme: light)" />
   <meta name="theme-color" content="#0b1220" media="(prefers-color-scheme: dark)" />
   <meta name="apple-mobile-web-app-capable" content="yes" />
@@ -88,7 +88,7 @@
 
           <label class="field">
             <span>Amount (₱)</span>
-            <input type="number" id="amount" inputmode="decimal" min="0.01" step="0.01" placeholder="0.00" required />
+            <input type="text" id="amount" inputmode="decimal" enterkeyhint="done" autocomplete="off" placeholder="0.00" required />
           </label>
 
           <label class="field" id="categoryField">
@@ -150,7 +150,7 @@
           <h2>Monthly budget</h2>
           <label class="field inline">
             <span>Budget (₱)</span>
-            <input type="number" id="budgetInput" inputmode="decimal" min="0" step="1" placeholder="e.g. 15000" />
+            <input type="text" id="budgetInput" inputmode="decimal" enterkeyhint="done" autocomplete="off" placeholder="e.g. 15000" />
           </label>
           <button type="button" class="btn secondary" id="saveBudgetBtn">Save budget</button>
           <p class="hint" id="budgetHint"></p>
@@ -172,7 +172,7 @@
             <button type="button" class="btn secondary" id="exportCsvBtn">Export CSV</button>
             <button type="button" class="btn secondary" id="exportJsonBtn">Export JSON backup</button>
             <button type="button" class="btn secondary" id="importJsonBtn">Import JSON backup</button>
-            <input type="file" id="importFile" accept="application/json,.json" hidden />
+            <input type="file" id="importFile" class="visually-hidden" accept="application/json,.json" tabindex="-1" />
           </div>
         </div>
 
